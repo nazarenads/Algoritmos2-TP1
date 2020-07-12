@@ -1,5 +1,4 @@
 #define _POSIX_C_SOURCE 200809L
-
 #include "strutil.h"
 #include <stddef.h>
 #include <string.h>
@@ -55,7 +54,7 @@ void free_strv(char *strv[]){
 char **split(const char *str, char sep){
 	size_t largo = strlen(str);                                         
 	size_t cantidad_de_partes = contar_partes(str, largo, sep);
-	char** vector_de_partes = (char **)calloc(cantidad_de_partes, sizeof(char*));
+	char** vector_de_partes = (char**)calloc(cantidad_de_partes, sizeof(char*));
 	if (!vector_de_partes) return NULL;
 	size_t pos_inicial_cursor = 0;                                                  
 	size_t pos_final_cursor = 0;                                                
@@ -79,26 +78,17 @@ char **split(const char *str, char sep){
 }
 
 char *join(char **strv, char sep){
-	// inicializo un contador para contar cuantas partes tendre que unir
 	size_t contador_de_partes = 0;
-	// inicializo un contador para contar los caracteres que tengo en total
 	size_t total_de_caracteres = 0;
-	// mientras la parte no sea null voy contando la cantidad de partes
-	while (strv[contador_de_partes]) {
-		// recorro cada parte y voy acumulando la cantidad de caracteres en un contador
+	while (strv[contador_de_partes]){
 		for (size_t j=0; j < strlen(strv[contador_de_partes]); j++) {
 			total_de_caracteres++;
 		}
 		contador_de_partes++;
 	}
-	// la cantidad de separadores que voy a tener que agregar siempre es una menos que la cantidad de partes
 	size_t num_de_separadores = contador_de_partes - 1;
-	// pido memoria para guardar la nueva cadena que sera la union de todas las partes
 	char* nueva_cadena = (char*)calloc(total_de_caracteres + num_de_separadores + 1, sizeof(char));
-	// si falla el pedido de memoria devuelvo null
-	if (!nueva_cadena) 
-		return NULL;
-	// vuelvo a recorrer todo el arreglo copiando cada cadena en una nueva
+	if (!nueva_cadena) return NULL;
 	char* puntero_a_final = nueva_cadena;
 	for (size_t i = 0; i < contador_de_partes; i++) {
 		puntero_a_final = stpcpy(puntero_a_final, strv[i]);

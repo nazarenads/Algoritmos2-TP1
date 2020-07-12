@@ -16,6 +16,10 @@
 #define RAIZ "sqrt"
 #define LOGARITMO "log"
 
+/* ******************************************************************
+ *                   OPERACIONES
+ * *****************************************************************/
+
 long suma(long a, long b, bool* error){
     return a+b;
 }
@@ -47,6 +51,10 @@ long logaritmo(long exponente, long base, bool* error){
     return resultado_final;
 }
 
+/* ******************************************************************
+ *                   FUNCIONES DC
+ * *****************************************************************/
+
 bool leer_linea(FILE* archivo, char** linea, size_t* capacidad){
     size_t caracteres = getline(linea, capacidad, archivo);
     if (caracteres == -1) return false;
@@ -74,9 +82,16 @@ bool realizar_operacion_binaria(pila_t* pila, long (*operacion)(long factor1, lo
 
 bool operador_ternario(pila_t* pila){
     long* ultimo_factor = pila_desapilar(pila);
-    if(pila_esta_vacia(pila)) return false;
+    if(pila_esta_vacia(pila)) {
+        free(ultimo_factor);
+        return false;
+    }
     long* penultimo_factor = pila_desapilar(pila);
-    if(pila_esta_vacia(pila)) return false;
+    if(pila_esta_vacia(pila)) {
+        free(penultimo_factor);
+        free(ultimo_factor);
+        return false;
+    }
     long* antepenultimo_factor = pila_desapilar(pila);
     long* resultado = malloc(sizeof(long));
     *resultado = *antepenultimo_factor ? *penultimo_factor : *ultimo_factor;
@@ -144,7 +159,6 @@ bool apilar_y_operar(char** vector_tokens, pila_t* pila_tokens, size_t i){
         long* numero_guardado = malloc(sizeof(long));
         *numero_guardado = numero;
         bool apilar = pila_apilar(pila_tokens, numero_guardado);
-        printf("apile el numero: %ld %d \n", *numero_guardado, apilar);
         if (!apilar) {
             free(numero_guardado);
             printf("ERROR\n");
@@ -184,31 +198,40 @@ void obtener_resultado(pila_t* pila){
     free(res);
 }
 
+bool procesar_linea(char* linea){
+    if (!linea || linea[0] == '\n') return false;
+    size_t largo_linea = strlen(linea);
+    if (linea[largo_linea-1] == '\n'){
+        linea[largo_linea-1] = '\0';
+    }
+    char** vector_tokens =  split(linea, ' ');
+    size_t i = 0;
+    pila_t* pila_tokens = pila_crear();
+    if (!pila_tokens) {
+        free_strv(vector_tokens);
+        return false;
+    }
+    bool operacion = false;
+    while(vector_tokens[i]){
+        operacion = apilar_y_operar(vector_tokens, pila_tokens, i);
+        if(!operacion) break;
+        i++;
+    }
+    if(operacion){
+        obtener_resultado(pila_tokens);
+    }
+    pila_destruir(pila_tokens);
+    free_strv(vector_tokens);
+    return true;
+}
+
 bool dc(FILE* archivo, char* linea, size_t capacidad){
     while(leer_linea(archivo, &linea, &capacidad)){
-        if (!linea || linea[0] == '\n') return false;
-        size_t largo_linea = strlen(linea);
-        if (linea[largo_linea-1] == '\n'){
-            linea[largo_linea-1] = '\0';
-        }
-        char** vector_tokens =  split(linea, ' ');
-        size_t i = 0;
-        pila_t* pila_tokens = pila_crear();
-        if (!pila_tokens) {
-            free_strv(vector_tokens);
+        bool procesamiento = procesar_linea(linea);
+        if(!procesamiento) {
+            free(linea);
             return false;
         }
-        bool operacion = false;
-	    while(vector_tokens[i]){
-            operacion = apilar_y_operar(vector_tokens, pila_tokens, i);
-            if(!operacion) break;
-            i++;
-        }
-        if(operacion){
-            obtener_resultado(pila_tokens);
-        }
-        pila_destruir(pila_tokens);
-        free_strv(vector_tokens);
     }
     free(linea);
     return true;
