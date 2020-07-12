@@ -15,8 +15,6 @@
 #define OPERADOR_TERNARIO '?'
 #define RAIZ "sqrt"
 #define LOGARITMO "log"
-//cosas para arreglar
-// memory leaks
 
 long suma(long a, long b, bool* error){
     return a+b;
@@ -57,7 +55,10 @@ bool leer_linea(FILE* archivo, char** linea, size_t* capacidad){
 
 bool realizar_operacion_binaria(pila_t* pila, long (*operacion)(long factor1, long factor2, bool* error), bool* error){
     long* ultimo_factor = pila_desapilar(pila);
-    if(pila_esta_vacia(pila)) return false;
+    if (pila_esta_vacia(pila)){
+        free(ultimo_factor);
+        return false;
+    }
     long* penultimo_factor = pila_desapilar(pila);
     long* resultado = malloc(sizeof(long));
     *resultado = operacion(*penultimo_factor, *ultimo_factor, error);
@@ -137,12 +138,15 @@ bool reducir_factores_apilados(pila_t* pila, char* operador, bool* error){
 }
 
 bool apilar_y_operar(char** vector_tokens, pila_t* pila_tokens, size_t i){
-    long* numero = malloc(sizeof(long));
     char* ptr;
-    *numero = strtol(vector_tokens[i], &ptr, 10);
+    long numero = strtol(vector_tokens[i], &ptr, 10);
     if (*ptr == '\0'){
-        bool apilar = pila_apilar(pila_tokens, numero);
+        long* numero_guardado = malloc(sizeof(long));
+        *numero_guardado = numero;
+        bool apilar = pila_apilar(pila_tokens, numero_guardado);
+        printf("apile el numero: %ld %d \n", *numero_guardado, apilar);
         if (!apilar) {
+            free(numero_guardado);
             printf("ERROR\n");
             return false;
         }
