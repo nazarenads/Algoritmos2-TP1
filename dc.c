@@ -51,6 +51,18 @@ long logaritmo(long exponente, long base, bool* error){
     return resultado_final;
 }
 
+bool calcular_raiz(pila_t* pila, bool* error){
+    long* radicando = pila_desapilar(pila);
+    if (*radicando < 0) *error = true;
+    double resultado = sqrt((double)(*radicando));
+    long* resultado_final = malloc(sizeof(long));
+    *resultado_final = (long)resultado;
+    bool apilar = pila_apilar(pila, resultado_final);
+    if (!apilar) return false;
+    free(radicando);
+    return true;
+}
+
 /* ******************************************************************
  *                   FUNCIONES DC
  * *****************************************************************/
@@ -105,19 +117,6 @@ bool operador_ternario(pila_t* pila){
     free(antepenultimo_factor);
     return true;
 }
-
-bool calcular_raiz(pila_t* pila, bool* error){
-    long* radicando = pila_desapilar(pila);
-    if (*radicando < 0) *error = true;
-    double resultado = sqrt((double)(*radicando));
-    long* resultado_final = malloc(sizeof(long));
-    *resultado_final = (long)resultado;
-    bool apilar = pila_apilar(pila, resultado_final);
-    if (!apilar) return false;
-    free(radicando);
-    return true;
-}
-
 
 bool reducir_factores_apilados(pila_t* pila, char* operador, bool* error){
     if (*operador == SUMA){
