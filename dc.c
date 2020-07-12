@@ -16,7 +16,7 @@
 #define RAIZ "sqrt"
 #define LOGARITMO "log"
 //cosas para arreglar
-// problemas con los 0s
+// memory leaks
 
 long suma(long a, long b, bool* error){
     return a+b;
@@ -57,11 +57,8 @@ bool leer_linea(FILE* archivo, char** linea, size_t* capacidad){
 
 bool realizar_operacion_binaria(pila_t* pila, long (*operacion)(long factor1, long factor2, bool* error), bool* error){
     long* ultimo_factor = pila_desapilar(pila);
-    if(!ultimo_factor) return false;
-    //printf("ultimo_factor: %ld\n", ultimo_factor);
+    if(pila_esta_vacia(pila)) return false;
     long* penultimo_factor = pila_desapilar(pila);
-    if(!penultimo_factor) return false;
-    //printf("penultimo_factor: %ld\n", penultimo_factor);
     long* resultado = malloc(sizeof(long));
     *resultado = operacion(*penultimo_factor, *ultimo_factor, error);
     bool apilar = pila_apilar(pila, resultado);
@@ -75,19 +72,21 @@ bool realizar_operacion_binaria(pila_t* pila, long (*operacion)(long factor1, lo
 }
 
 bool operador_ternario(pila_t* pila){
-    long ultimo_factor = (long)pila_desapilar(pila);
-    if(ultimo_factor) return false;
-    //printf("ultimo_factor: %ld\n", ultimo_factor);
-    long penultimo_factor = (long)pila_desapilar(pila);
-    if(!penultimo_factor) return false;
-    //printf("penultimo_factor: %ld\n", penultimo_factor);
-    long antepenultimo_factor = (long)pila_desapilar(pila);
-    if(!antepenultimo_factor) return false;
-    //printf("antepenultimo_factor: %ld\n", antepenultimo_factor);
-    long resultado = antepenultimo_factor ? penultimo_factor : ultimo_factor;
-    //printf("asi queda el ternario: %ld ? %ld : %ld\n", antepenultimo_factor, penultimo_factor, ultimo_factor);
-    bool apilar = pila_apilar(pila, (void*)resultado);
-    if (!apilar) return false;
+    long* ultimo_factor = pila_desapilar(pila);
+    if(pila_esta_vacia(pila)) return false;
+    long* penultimo_factor = pila_desapilar(pila);
+    if(pila_esta_vacia(pila)) return false;
+    long* antepenultimo_factor = pila_desapilar(pila);
+    long* resultado = malloc(sizeof(long));
+    *resultado = *antepenultimo_factor ? *penultimo_factor : *ultimo_factor;
+    bool apilar = pila_apilar(pila, resultado);
+    if (!apilar) {
+        free(resultado);
+        return false;
+    }
+    free(ultimo_factor);
+    free(penultimo_factor);
+    free(antepenultimo_factor);
     return true;
 }
 
@@ -99,6 +98,7 @@ bool calcular_raiz(pila_t* pila, bool* error){
     *resultado_final = (long)resultado;
     bool apilar = pila_apilar(pila, resultado_final);
     if (!apilar) return false;
+    free(radicando);
     return true;
 }
 
@@ -141,16 +141,13 @@ bool apilar_y_operar(char** vector_tokens, pila_t* pila_tokens, size_t i){
     char* ptr;
     *numero = strtol(vector_tokens[i], &ptr, 10);
     if (*ptr == '\0'){
-        //printf("numero: %ld\n", numero);
         bool apilar = pila_apilar(pila_tokens, numero);
         if (!apilar) {
             printf("ERROR\n");
             return false;
         }
     } else {
-        //aca tengo que usar el operador para reducir los nums que ya apile
         char* operador = vector_tokens[i];
-        //printf("operador: %s\n", operador);
         bool error = false;
         if(pila_esta_vacia(pila_tokens)) printf("ERROR\n");
         bool reduccion = reducir_factores_apilados(pila_tokens, operador, &error);
@@ -161,18 +158,25 @@ bool apilar_y_operar(char** vector_tokens, pila_t* pila_tokens, size_t i){
     }
     return true;
 }
+void vaciar_pila(pila_t* pila){
+    while(!pila_esta_vacia(pila)){
+        long* elemento =  pila_desapilar(pila);
+        free(elemento);
+    }
+}
 
 void obtener_resultado(pila_t* pila){
     bool quedaron_elementos = false;
     long* res = pila_desapilar(pila);
     if(!pila_esta_vacia(pila)){
         quedaron_elementos = true;
-        free(res);
+        vaciar_pila(pila);
         printf("ERROR\n");
     }
     if(!quedaron_elementos){
         printf("%ld\n", *res);
     }
+    vaciar_pila(pila);
     free(res);
 }
 
@@ -186,7 +190,10 @@ bool dc(FILE* archivo, char* linea, size_t capacidad){
         char** vector_tokens =  split(linea, ' ');
         size_t i = 0;
         pila_t* pila_tokens = pila_crear();
-        if (!pila_tokens) return false;
+        if (!pila_tokens) {
+            free_strv(vector_tokens);
+            return false;
+        }
         bool operacion = false;
 	    while(vector_tokens[i]){
             operacion = apilar_y_operar(vector_tokens, pila_tokens, i);
@@ -203,9 +210,7 @@ bool dc(FILE* archivo, char* linea, size_t capacidad){
     return true;
 }
 
-
-
-int main( ) {
+int main() {
 
     char* linea = NULL; 
     size_t capacidad = 0;
