@@ -136,7 +136,7 @@ bool reducir_factores_apilados(pila_t* pila, char* operador, bool* error){
     return true;
 }
 
-bool obtener_pila_de_tokens(char** vector_tokens, pila_t* pila_tokens, size_t i){
+bool apilar_y_operar(char** vector_tokens, pila_t* pila_tokens, size_t i){
     long* numero = malloc(sizeof(long));
     char* ptr;
     *numero = strtol(vector_tokens[i], &ptr, 10);
@@ -162,11 +162,23 @@ bool obtener_pila_de_tokens(char** vector_tokens, pila_t* pila_tokens, size_t i)
     return true;
 }
 
+void obtener_resultado(pila_t* pila){
+    bool quedaron_elementos = false;
+    long* res = pila_desapilar(pila);
+    if(!pila_esta_vacia(pila)){
+        quedaron_elementos = true;
+        free(res);
+        printf("ERROR\n");
+    }
+    if(!quedaron_elementos){
+        printf("%ld\n", *res);
+    }
+    free(res);
+}
 
-bool procesar_archivo(FILE* archivo, char* linea, size_t capacidad){
+bool dc(FILE* archivo, char* linea, size_t capacidad){
     while(leer_linea(archivo, &linea, &capacidad)){
         if (!linea || linea[0] == '\n') return false;
-        //sacar el \n del final de la linea si es que hay
         size_t largo_linea = strlen(linea);
         if (linea[largo_linea-1] == '\n'){
             linea[largo_linea-1] = '\0';
@@ -176,23 +188,13 @@ bool procesar_archivo(FILE* archivo, char* linea, size_t capacidad){
         pila_t* pila_tokens = pila_crear();
         if (!pila_tokens) return false;
         bool operacion = false;
-        bool quedaron_elementos = false;
 	    while(vector_tokens[i]){
-            operacion = obtener_pila_de_tokens(vector_tokens, pila_tokens, i);
+            operacion = apilar_y_operar(vector_tokens, pila_tokens, i);
             if(!operacion) break;
             i++;
         }
         if(operacion){
-            long* res = pila_desapilar(pila_tokens);
-            if(!pila_esta_vacia(pila_tokens)){
-                quedaron_elementos = true;
-                free(res);
-                printf("ERROR\n");
-            }
-            if(!quedaron_elementos){
-                printf("%ld\n", *res);
-            }
-            free(res);
+            obtener_resultado(pila_tokens);
         }
         pila_destruir(pila_tokens);
         free_strv(vector_tokens);
@@ -207,8 +209,8 @@ int main( ) {
 
     char* linea = NULL; 
     size_t capacidad = 0;
-    bool procesamiento = procesar_archivo(stdin, linea, capacidad);
-    if (!procesamiento) printf("ERROR\n");
+    bool calculo = dc(stdin, linea, capacidad);
+    if (!calculo) printf("ERROR\n");
 
     return 0;
 }
