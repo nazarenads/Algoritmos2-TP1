@@ -69,6 +69,8 @@ bool realizar_operacion_binaria(pila_t* pila, long (*operacion)(long factor1, lo
         free(resultado);
         return false;
     }
+    free(ultimo_factor);
+    free(penultimo_factor);
     return true;
 }
 
@@ -184,6 +186,7 @@ bool procesar_archivo(FILE* archivo, char* linea, size_t capacidad){
             long* res = pila_desapilar(pila_tokens);
             if(!pila_esta_vacia(pila_tokens)){
                 quedaron_elementos = true;
+                free(res);
                 printf("ERROR\n");
             }
             if(!quedaron_elementos){
