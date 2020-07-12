@@ -65,7 +65,10 @@ bool realizar_operacion_binaria(pila_t* pila, long (*operacion)(long factor1, lo
     long* resultado = malloc(sizeof(long));
     *resultado = operacion(*penultimo_factor, *ultimo_factor, error);
     bool apilar = pila_apilar(pila, resultado);
-    if (!apilar) return false;
+    if (!apilar){
+        free(resultado);
+        return false;
+    }
     return true;
 }
 
@@ -178,8 +181,7 @@ bool procesar_archivo(FILE* archivo, char* linea, size_t capacidad){
             i++;
         }
         if(operacion){
-            long* res = malloc(sizeof(long));
-            res = pila_desapilar(pila_tokens);
+            long* res = pila_desapilar(pila_tokens);
             if(!pila_esta_vacia(pila_tokens)){
                 quedaron_elementos = true;
                 printf("ERROR\n");
@@ -190,7 +192,9 @@ bool procesar_archivo(FILE* archivo, char* linea, size_t capacidad){
             free(res);
         }
         pila_destruir(pila_tokens);
+        free_strv(vector_tokens);
     }
+    free(linea);
     return true;
 }
 
@@ -202,8 +206,6 @@ int main( ) {
     size_t capacidad = 0;
     bool procesamiento = procesar_archivo(stdin, linea, capacidad);
     if (!procesamiento) printf("ERROR\n");
-    
-    free(linea);
 
     return 0;
 }
