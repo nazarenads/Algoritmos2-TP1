@@ -78,7 +78,7 @@ char **split(const char *str, char sep){
 }
 
 char *join(char **strv, char sep){
-	if(!strv) {
+	if (!strv) {
 		char* nueva_cadena = malloc(sizeof(char));
 		nueva_cadena[0] = '\0';
 		return nueva_cadena;
@@ -94,13 +94,20 @@ char *join(char **strv, char sep){
 	size_t num_de_separadores = contador_de_partes - 1;
 	char* nueva_cadena = (char*)calloc(total_de_caracteres + num_de_separadores + 1, sizeof(char));
 	if (!nueva_cadena) return NULL;
-	char* puntero_a_final = nueva_cadena;
+	size_t largo_cadena = 0;
+	size_t pos = 0;
 	for (size_t i = 0; i < contador_de_partes; i++) {
-		puntero_a_final = stpcpy(puntero_a_final, strv[i]);
-		if(i != contador_de_partes - 1){
-			puntero_a_final = stpcpy(puntero_a_final, &sep);
+		largo_cadena = strlen(strv[i]);
+		for(int j = 0; j < largo_cadena; j++){
+			nueva_cadena[pos]=strv[i][j];
+			pos++;
+		}
+		if(i != contador_de_partes-1){
+			nueva_cadena[pos]=sep;
+			pos++;
 		}
 	}
+	nueva_cadena[pos]='\0';
 	return nueva_cadena;
 }
 
