@@ -72,12 +72,12 @@ bool calcular_division(pila_t* pila, bool* error){
         free(ultimo_factor);
         return false;
     }
-    if (ultimo_factor == 0) {
+    if (*ultimo_factor == 0){
         free(ultimo_factor);
         return false;
     }
     long* penultimo_factor = pila_desapilar(pila);
-    long* resultado = malloc(sizeof(long));
+    long* resultado = malloc(sizeof(long));printf("Numero desapilado: %ln\n", penultimo_factor);
     *resultado = division(*penultimo_factor, *ultimo_factor, error);
     bool apilar = pila_apilar(pila, resultado);
     free(ultimo_factor);
@@ -175,12 +175,20 @@ bool reducir_factores_apilados(pila_t* pila, char* operador, bool* error){
     return true;
 }
 
+void vaciar_pila(pila_t* pila){
+    while(!pila_esta_vacia(pila)){
+        long* elemento =  pila_desapilar(pila);
+        free(elemento);
+    }
+}
+
 bool apilar_y_operar(char** vector_tokens, pila_t* pila_tokens, size_t i){
     char* ptr;
     long numero = strtol(vector_tokens[i], &ptr, 10);
     if (*ptr == '\0'){
         long* numero_guardado = malloc(sizeof(long));
         *numero_guardado = numero;
+        printf("Numero guardado: %ld\n", numero);
         bool apilar = pila_apilar(pila_tokens, numero_guardado);
         if (!apilar) {
             free(numero_guardado);
@@ -190,20 +198,18 @@ bool apilar_y_operar(char** vector_tokens, pila_t* pila_tokens, size_t i){
     } else {
         char* operador = vector_tokens[i];
         bool error = false;
-        if(pila_esta_vacia(pila_tokens)) printf("ERROR\n");
+        if(pila_esta_vacia(pila_tokens)) {
+            printf("ERROR\n");
+            return false;
+        }
         bool reduccion = reducir_factores_apilados(pila_tokens, operador, &error);
         if (!reduccion || error) {
+            vaciar_pila(pila_tokens);
             printf("ERROR\n");
             return false;
         }
     }
     return true;
-}
-void vaciar_pila(pila_t* pila){
-    while(!pila_esta_vacia(pila)){
-        long* elemento =  pila_desapilar(pila);
-        free(elemento);
-    }
 }
 
 void obtener_resultado(pila_t* pila){
