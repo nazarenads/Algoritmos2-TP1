@@ -77,7 +77,7 @@ bool calcular_division(pila_t* pila, bool* error){
         return false;
     }
     long* penultimo_factor = pila_desapilar(pila);
-    long* resultado = malloc(sizeof(long));printf("Numero desapilado: %ln\n", penultimo_factor);
+    long* resultado = malloc(sizeof(long));
     *resultado = division(*penultimo_factor, *ultimo_factor, error);
     bool apilar = pila_apilar(pila, resultado);
     free(ultimo_factor);
@@ -188,7 +188,6 @@ bool apilar_y_operar(char** vector_tokens, pila_t* pila_tokens, size_t i){
     if (*ptr == '\0'){
         long* numero_guardado = malloc(sizeof(long));
         *numero_guardado = numero;
-        printf("Numero guardado: %ld\n", numero);
         bool apilar = pila_apilar(pila_tokens, numero_guardado);
         if (!apilar) {
             free(numero_guardado);
@@ -198,7 +197,7 @@ bool apilar_y_operar(char** vector_tokens, pila_t* pila_tokens, size_t i){
     } else {
         char* operador = vector_tokens[i];
         bool error = false;
-        if(pila_esta_vacia(pila_tokens)) {
+        if (pila_esta_vacia(pila_tokens)){
             printf("ERROR\n");
             return false;
         }
