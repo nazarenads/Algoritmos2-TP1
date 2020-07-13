@@ -52,8 +52,12 @@ long logaritmo(long exponente, long base, bool* error){
 }
 
 bool calcular_raiz(pila_t* pila, bool* error){
+    if(pila_esta_vacia(pila)) return false;
     long* radicando = pila_desapilar(pila);
-    if (*radicando < 0) *error = true;
+    if (*radicando < 0){
+        free(radicando);
+        return false;
+    }
     double resultado = sqrt((double)(*radicando));
     long* resultado_final = malloc(sizeof(long));
     *resultado_final = (long)resultado;
