@@ -78,6 +78,11 @@ char **split(const char *str, char sep){
 }
 
 char *join(char **strv, char sep){
+	if(!strv) {
+		char* nueva_cadena = malloc(sizeof(char));
+		nueva_cadena[0] = '\0';
+		return nueva_cadena;
+	}
 	size_t contador_de_partes = 0;
 	size_t total_de_caracteres = 0;
 	while (strv[contador_de_partes]){

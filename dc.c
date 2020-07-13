@@ -127,8 +127,6 @@ bool reducir_factores_apilados(pila_t* pila, char* operador, bool* error){
         if(!operacion_resta) return false;
     }else if(*operador == DIVISION){
         bool operacion_division = realizar_operacion_binaria(pila, division, error);
-        long resultado = (long)pila_ver_tope(pila);
-        if(resultado == 0) return false;
         if(!operacion_division) return false;
     }else if(*operador == PRODUCTO){
         bool operacion_producto = realizar_operacion_binaria(pila, producto, error);
