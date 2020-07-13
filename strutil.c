@@ -78,21 +78,28 @@ char **split(const char *str, char sep){
 }
 
 char *join(char **strv, char sep){
+	size_t contador_de_partes = 0;
+	size_t total_de_caracteres = 0;
+	size_t num_de_separadores = 0;
+	size_t cantidad_de_barra_cero = 0;
 	if (!strv) {
 		char* nueva_cadena = malloc(sizeof(char));
 		nueva_cadena[0] = '\0';
 		return nueva_cadena;
 	}
-	size_t contador_de_partes = 0;
-	size_t total_de_caracteres = 0;
 	while (strv[contador_de_partes]){
 		for (size_t j=0; j < strlen(strv[contador_de_partes]); j++) {
 			total_de_caracteres++;
 		}
 		contador_de_partes++;
 	}
-	size_t num_de_separadores = contador_de_partes - 1;
-	char* nueva_cadena = (char*)calloc(total_de_caracteres + num_de_separadores + 1, sizeof(char));
+	if (contador_de_partes > 0){
+		num_de_separadores = contador_de_partes - 1;
+	}
+	if (sep == '\0'){
+		cantidad_de_barra_cero = num_de_separadores;
+	}
+	char* nueva_cadena = (char*)calloc(total_de_caracteres + num_de_separadores + 1 - cantidad_de_barra_cero, sizeof(char));
 	if (!nueva_cadena) return NULL;
 	size_t largo_cadena = 0;
 	size_t pos = 0;

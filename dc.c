@@ -29,7 +29,6 @@ long resta(long a, long b, bool* error){
 }
 
 long division(long a, long b, bool* error){
-    if(b == 0) *error = true;
     return a/b;
 }
 
@@ -67,6 +66,29 @@ bool calcular_raiz(pila_t* pila, bool* error){
     return true;
 }
 
+bool calcular_division(pila_t* pila, bool* error){
+    long* ultimo_factor = pila_desapilar(pila);
+    if (pila_esta_vacia(pila)){
+        free(ultimo_factor);
+        return false;
+    }
+    if (ultimo_factor == 0) {
+        free(ultimo_factor);
+        return false;
+    }
+    long* penultimo_factor = pila_desapilar(pila);
+    long* resultado = malloc(sizeof(long));
+    *resultado = division(*penultimo_factor, *ultimo_factor, error);
+    bool apilar = pila_apilar(pila, resultado);
+    if (!apilar){
+        free(resultado);
+        return false;
+    }
+    free(ultimo_factor);
+    free(penultimo_factor);
+    return true;
+}
+
 /* ******************************************************************
  *                   FUNCIONES DC
  * *****************************************************************/
@@ -84,11 +106,6 @@ bool realizar_operacion_binaria(pila_t* pila, long (*operacion)(long factor1, lo
         return false;
     }
     long* penultimo_factor = pila_desapilar(pila);
-    if (operacion == division && ultimo_factor == 0){
-        free(ultimo_factor);
-        free(penultimo_factor);
-        return false; 
-    }
     long* resultado = malloc(sizeof(long));
     *resultado = operacion(*penultimo_factor, *ultimo_factor, error);
     bool apilar = pila_apilar(pila, resultado);
@@ -135,7 +152,7 @@ bool reducir_factores_apilados(pila_t* pila, char* operador, bool* error){
         bool operacion_resta = realizar_operacion_binaria(pila, resta, error);
         if(!operacion_resta) return false;
     }else if(*operador == DIVISION){
-        bool operacion_division = realizar_operacion_binaria(pila, division, error);
+        bool operacion_division = calcular_division(pila, error);
         if(!operacion_division) return false;
     }else if(*operador == PRODUCTO){
         bool operacion_producto = realizar_operacion_binaria(pila, producto, error);
