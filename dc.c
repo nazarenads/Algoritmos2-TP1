@@ -80,6 +80,11 @@ bool realizar_operacion_binaria(pila_t* pila, long (*operacion)(long factor1, lo
         return false;
     }
     long* penultimo_factor = pila_desapilar(pila);
+    if (operacion == division && ultimo_factor == 0){
+        free(ultimo_factor);
+        free(penultimo_factor);
+        return false; 
+    }
     long* resultado = malloc(sizeof(long));
     *resultado = operacion(*penultimo_factor, *ultimo_factor, error);
     bool apilar = pila_apilar(pila, resultado);
