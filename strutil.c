@@ -110,11 +110,12 @@ char *join(char **strv, char sep){
 			pos++;
 		}
 		if(i != contador_de_partes-1){
+			if(sep != '\0'){
 			nueva_cadena[pos]=sep;
-			pos++;
+			pos++;	
+			}
 		}
 	}
-	nueva_cadena[pos]='\0';
 	return nueva_cadena;
 }
 

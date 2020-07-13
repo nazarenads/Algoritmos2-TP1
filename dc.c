@@ -80,12 +80,12 @@ bool calcular_division(pila_t* pila, bool* error){
     long* resultado = malloc(sizeof(long));
     *resultado = division(*penultimo_factor, *ultimo_factor, error);
     bool apilar = pila_apilar(pila, resultado);
+    free(ultimo_factor);
+    free(penultimo_factor);
     if (!apilar){
         free(resultado);
         return false;
     }
-    free(ultimo_factor);
-    free(penultimo_factor);
     return true;
 }
 
@@ -109,12 +109,12 @@ bool realizar_operacion_binaria(pila_t* pila, long (*operacion)(long factor1, lo
     long* resultado = malloc(sizeof(long));
     *resultado = operacion(*penultimo_factor, *ultimo_factor, error);
     bool apilar = pila_apilar(pila, resultado);
+    free(ultimo_factor);
+    free(penultimo_factor);
     if (!apilar){
         free(resultado);
         return false;
     }
-    free(ultimo_factor);
-    free(penultimo_factor);
     return true;
 }
 
@@ -134,13 +134,13 @@ bool operador_ternario(pila_t* pila){
     long* resultado = malloc(sizeof(long));
     *resultado = *antepenultimo_factor ? *penultimo_factor : *ultimo_factor;
     bool apilar = pila_apilar(pila, resultado);
+    free(ultimo_factor);
+    free(penultimo_factor);
+    free(antepenultimo_factor);
     if (!apilar) {
         free(resultado);
         return false;
     }
-    free(ultimo_factor);
-    free(penultimo_factor);
-    free(antepenultimo_factor);
     return true;
 }
 
